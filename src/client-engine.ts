@@ -1,0 +1,133 @@
+import EventEmitter from "eventemitter3";
+import shuffle from "knuth-shuffle-seeded";
+import type { ClientMessageObject } from "./client";
+import type { ServerMessageObject } from "./server";
+
+export interface ClientEngineOptions {
+  msPerTick: number;
+  windPhi: number;
+}
+
+export interface ClientEngineState extends ClientMessageObject {
+  clientCount: number;
+  readonly totalWindForce: { x: number; z: number };
+  readonly candles: ClientEngineState.Candle[];
+}
+
+export namespace ClientEngineState {
+  export interface Candle {
+    x: number;
+    z: number;
+    isLit: boolean;
+  }
+}
+
+export class ClientEngine extends EventEmitter<{
+  start: [];
+  stop: [];
+  error: [any];
+  tick: [Readonly<ClientEngineState>];
+}> {
+  private running = false;
+  private lastTickTime = 0;
+
+  private readonly options: ClientEngineOptions;
+
+  private readonly state: ClientEngineState;
+
+  constructor(options: ClientEngineOptions) {
+    super();
+
+    options = structuredClone(options);
+
+    this.options = options;
+
+    this.state = {
+      windForce: 0,
+      clientCount: 0,
+      totalWindForce: { x: 0, z: 0 },
+      candles: [],
+    };
+  }
+
+  updateServerState(msg: ServerMessageObject): void {
+    this.state.clientCount = msg.clientCount;
+
+    this.state.totalWindForce.x = msg.totalWindForce * Math.cos(this.options.windPhi);
+    this.state.totalWindForce.z = msg.totalWindForce * Math.sin(this.options.windPhi);
+
+    if (this.state.candles.length !== msg.candleCount) {
+      this.state.candles.splice(0, this.state.candles.length);
+
+      const deltaR = 0.9 / msg.candleCount;
+      const deltaPhi = Math.PI / 5;
+
+      for (let i = 0; i < msg.candleCount; i++) {
+        this.state.candles.push({
+          x: i * deltaR * Math.cos(i * deltaPhi),
+          z: i * deltaR * Math.sin(i * deltaPhi),
+          isLit: true,
+        });
+      }
+
+      shuffle(this.state.candles, msg.candleCount);
+    }
+
+    let blownOutCandleCount = 0;
+    for (const candle of this.state.candles) {
+      if (!candle.isLit) blownOutCandleCount += 1;
+    }
+
+    while (blownOutCandleCount > msg.blownOutCandleCount) {
+      blownOutCandleCount -= 1;
+      this.state.candles[blownOutCandleCount].isLit = true;
+    }
+
+    while (blownOutCandleCount < msg.blownOutCandleCount) {
+      this.state.candles[blownOutCandleCount].isLit = true;
+      blownOutCandleCount += 1;
+    }
+  }
+
+  updateClientState(msg: ClientMessageObject): void {
+    this.state.windForce = msg.windForce;
+  }
+
+  private tick(deltaMs: number): void {
+    this.emit("tick", this.state);
+  }
+
+  start(): void {
+    if (this.running) return;
+    this.running = true;
+    this.lastTickTime = performance.now();
+
+    const run = () => {
+      try {
+        const now = performance.now();
+        const deltaMs = now - this.lastTickTime;
+
+        this.tick(deltaMs);
+
+        this.lastTickTime = now;
+
+        if (this.running) {
+          setTimeout(run, this.options.msPerTick);
+        } else {
+          this.emit("stop");
+        }
+      } catch (error) {
+        this.emit("error", error);
+      }
+    };
+
+    setTimeout(() => {
+      this.emit("start");
+      run();
+    }, this.options.msPerTick);
+  }
+
+  stop(): void {
+    this.running = false;
+  }
+}

@@ -1,0 +1,14 @@
+namespace BirthdayCake;
+
+table ServerMessage {
+  client_count: uint8;
+
+  candle_count: uint8;
+  blown_out_candle_count: uint8;
+
+  total_wind_force: float32;
+}
+
+table ClientMessage {
+  wind_force: float32;
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Birthday Cake</title>
+    <script src="client.js"></script>
+    <script>
+      window.onload = () => {
+        const app = new ClientApp({
+          client: {
+            url: "ws://127.0.0.1:9117",
+          },
+          engine: {
+            msPerTick: Math.round(1000 / 16),
+            windPhi: 0,
+          },
+        });
+      };
+    </script>
+  </head>
+  <body></body>
+</html>

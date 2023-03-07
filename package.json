@@ -1,0 +1,36 @@
+{
+  "name": "birthday-cake",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "prepare": "./scripts/prepare.sh",
+    "build": "./scripts/build.sh",
+    "start:server": "node ./dist/server.js",
+    "start:client": "http-server ./dist -o"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iliazeus/birthday-cake.git"
+  },
+  "author": "Ilia Pozdnyakov <ilia.pozdnyakov@ya.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iliazeus/birthday-cake/issues"
+  },
+  "homepage": "https://github.com/iliazeus/birthday-cake#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "eventemitter3": "^5.0.0",
+    "flatbuffers": "^23.3.3",
+    "knuth-shuffle-seeded": "^1.0.6",
+    "ws": "^8.12.1"
+  },
+  "devDependencies": {
+    "@types/knuth-shuffle-seeded": "^1.0.0",
+    "@types/ws": "^8.5.4",
+    "esbuild": "^0.17.11",
+    "http-server": "^14.1.1",
+    "prettier": "^2.8.4",
+    "typescript": "^4.9.5"
+  }
+}
