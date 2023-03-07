@@ -1,6 +1,8 @@
+import express from "express";
 import EventEmitter from "eventemitter3";
 import { Builder, ByteBuffer } from "flatbuffers";
-import { WebSocket, WebSocketServer } from "ws";
+import { Server as HttpServer } from "http";
+import { AddressInfo, WebSocket, WebSocketServer } from "ws";
 import { ClientMessage } from "./flatbuffers/birthday-cake/client-message";
 import { ServerMessage } from "./flatbuffers/birthday-cake/server-message";
 
@@ -17,24 +19,39 @@ export interface ServerMessageObject {
 }
 
 export class Server extends EventEmitter<{
-  open: [];
+  open: [AddressInfo];
   close: [];
   error: [any];
   connect: [WebSocket];
   disconnect: [WebSocket];
   message: [WebSocket, ClientMessage];
 }> {
+  private readonly httpServer: HttpServer;
   private readonly wsServer: WebSocketServer;
   private readonly openSockets = new Set<WebSocket>();
 
   constructor({ host, port }: ServerOptions) {
     super();
 
-    this.wsServer = new WebSocketServer({ host, port });
+    this.httpServer = express().use(express.static(__dirname)).listen(port, host);
+    this.httpServer.on("listening", () => this.onHttpServerListening());
+    this.httpServer.on("close", () => this.onHttpServerClose());
+    this.httpServer.on("error", (e) => this.onHttpServerError(e));
+
+    this.httpServer.on("upgrade", (req, socket, head) => {
+      if (req.url !== "/socket") {
+        socket.destroy();
+        return;
+      }
+
+      this.wsServer.handleUpgrade(req, socket, head, (ws) => {
+        this.wsServer.emit("connection", ws);
+      });
+    });
+
+    this.wsServer = new WebSocketServer({ noServer: true });
     this.wsServer.on("error", (e) => this.onWsServerError(e));
-    this.wsServer.on("listening", () => this.onWsServerListening());
     this.wsServer.on("connection", (ws) => this.onWsServerConnection(ws));
-    this.wsServer.on("close", () => this.onWsServerClose());
   }
 
   static open(options: ServerOptions): Promise<Server> {
@@ -57,8 +74,12 @@ export class Server extends EventEmitter<{
     this.emit("error", e);
   }
 
-  private onWsServerListening(): void {
-    this.emit("open");
+  private onHttpServerError(e: any): void {
+    this.emit("error", e);
+  }
+
+  private onHttpServerListening(): void {
+    this.emit("open", this.httpServer.address()! as AddressInfo);
   }
 
   private onWsServerConnection(ws: WebSocket): void {
@@ -68,7 +89,7 @@ export class Server extends EventEmitter<{
     ws.on("close", () => this.onSocketClose(ws));
   }
 
-  private onWsServerClose(): void {
+  private onHttpServerClose(): void {
     this.emit("close");
   }
 
@@ -121,7 +142,7 @@ export class Server extends EventEmitter<{
   }
 
   close(): void {
-    this.wsServer.close();
+    this.httpServer.close();
     for (const socket of this.openSockets) socket.close();
   }
 }

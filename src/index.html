@@ -9,7 +9,7 @@
       window.onload = () => {
         const app = new ClientApp({
           client: {
-            url: "ws://127.0.0.1:9117",
+            url: `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/socket`,
           },
           engine: {
             msPerTick: Math.round(1000 / 16),

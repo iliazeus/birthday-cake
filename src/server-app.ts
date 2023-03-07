@@ -14,7 +14,7 @@ export class ServerApp {
     console.log(`pid is ${process.pid}`);
 
     this.server = new Server(options.server);
-    this.server.on("open", () => console.log("server started"));
+    this.server.on("open", (a) => console.log(`server listening at http://${a.address}:${a.port}`));
     this.server.on("close", () => console.log("server stopped"));
     this.server.on("error", (e) => console.error("server error", e));
 
