@@ -11,6 +11,8 @@ export class ServerApp {
   private engine: ServerEngine;
 
   constructor(options: ServerAppOptions) {
+    console.log(`pid is ${process.pid}`);
+
     this.server = new Server(options.server);
     this.server.on("open", () => console.log("server started"));
     this.server.on("close", () => console.log("server stopped"));
@@ -19,6 +21,7 @@ export class ServerApp {
     this.engine = new ServerEngine(options.engine);
     this.engine.on("start", () => console.log("engine started"));
     this.engine.on("stop", () => console.log("engine stopped"));
+    this.engine.on("reset", () => console.log("engine reset"));
     this.engine.on("error", (e) => console.error("engine error", e));
 
     this.server.on("connect", (ws) => {
@@ -42,6 +45,10 @@ export class ServerApp {
     });
 
     this.engine.start();
+  }
+
+  reset(): void {
+    this.engine.reset();
   }
 
   stop(): void {

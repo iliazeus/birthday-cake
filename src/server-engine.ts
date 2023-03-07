@@ -18,6 +18,7 @@ export class ServerEngine extends EventEmitter<{
   error: [any];
   start: [];
   stop: [];
+  reset: [];
   tick: [Readonly<ServerEngineState>];
 }> {
   private running = false;
@@ -63,6 +64,7 @@ export class ServerEngine extends EventEmitter<{
   reset(): void {
     this.state.blownOutCandleCount = 0;
     this.state.msAtTargetWindForce = 0;
+    this.emit("reset");
   }
 
   private tick(deltaMs: number): void {

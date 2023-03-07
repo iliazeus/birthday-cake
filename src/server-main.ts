@@ -14,4 +14,5 @@ const app = new ServerApp({
   },
 });
 
+process.on("SIGHUP", () => app.reset());
 process.on("SIGINT", () => app.stop());

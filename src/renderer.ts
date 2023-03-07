@@ -82,10 +82,12 @@ export class Renderer {
       for (let i = 0; i < this.candleSvgs.length; i++) {
         if (this.candleSvgs[i].dataset.isLit && !state.candles[i].isLit) {
           this.candleSvgs[i].src = candleBlownOutSvgDataUrl;
+          this.candleSvgs[i].dataset.isLit = "";
         }
 
         if (!this.candleSvgs[i].dataset.isLit && state.candles[i].isLit) {
           this.candleSvgs[i].src = candleLitSvgDataUrl;
+          this.candleSvgs[i].dataset.isLit = "true";
         }
       }
     }
