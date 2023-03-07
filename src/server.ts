@@ -1,7 +1,8 @@
 import EventEmitter from "eventemitter3";
 import { Builder, ByteBuffer } from "flatbuffers";
 import { WebSocket, WebSocketServer } from "ws";
-import { ClientMessage, ServerMessage } from "./flatbuffers/birthday-cake";
+import { ClientMessage } from "./flatbuffers/birthday-cake/client-message";
+import { ServerMessage } from "./flatbuffers/birthday-cake/server-message";
 
 export interface ServerOptions {
   host: string;

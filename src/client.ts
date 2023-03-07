@@ -1,6 +1,7 @@
 import { EventEmitter } from "eventemitter3";
 import { ByteBuffer, Builder } from "flatbuffers";
-import { ClientMessage, ServerMessage } from "./flatbuffers/birthday-cake";
+import { ClientMessage } from "./flatbuffers/birthday-cake/client-message";
+import { ServerMessage } from "./flatbuffers/birthday-cake/server-message";
 
 export interface ClientOptions {
   url: string;
