@@ -6,7 +6,7 @@
     "prepare": "./scripts/prepare.sh",
     "build": "./scripts/build.sh",
     "start:server": "node ./dist/server.js",
-    "start:client": "http-server ./dist -o"
+    "start:client": "http-server ./dist -c-1 -o"
   },
   "repository": {
     "type": "git",

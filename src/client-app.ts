@@ -1,14 +1,17 @@
 import { Client, ClientOptions } from "./client";
 import { ClientEngine, ClientEngineOptions } from "./client-engine";
+import { Renderer, RendererOptions } from "./renderer";
 
 export interface ClientAppOptions {
   client: ClientOptions;
   engine: ClientEngineOptions;
+  renderer: RendererOptions;
 }
 
 export class ClientApp {
   private client: Client;
   private engine: ClientEngine;
+  private renderer: Renderer;
 
   constructor(options: ClientAppOptions) {
     this.client = new Client(options.client);
@@ -21,6 +24,8 @@ export class ClientApp {
     this.engine.on("stop", () => console.log("engine stopped"));
     this.engine.on("error", (e) => console.error("engine error", e));
 
+    this.renderer = new Renderer(options.renderer);
+
     this.client.on("message", (msg) => {
       this.engine.updateServerState({
         clientCount: msg.clientCount(),
@@ -32,7 +37,10 @@ export class ClientApp {
 
     this.engine.on("tick", (state) => {
       this.client.send(state);
+      this.renderer.updateEngineState(state);
     });
+
+    this.client.once("open", () => this.engine.start());
   }
 
   stop(): void {

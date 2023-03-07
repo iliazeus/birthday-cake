@@ -51,23 +51,35 @@ export class ClientEngine extends EventEmitter<{
   }
 
   updateServerState(msg: ServerMessageObject): void {
+    const { log2, floor, ceil, sin, cos, PI } = Math;
+
     this.state.clientCount = msg.clientCount;
 
-    this.state.totalWindForce.x = msg.totalWindForce * Math.cos(this.options.windPhi);
-    this.state.totalWindForce.z = msg.totalWindForce * Math.sin(this.options.windPhi);
+    this.state.totalWindForce.x = msg.totalWindForce * cos(this.options.windPhi);
+    this.state.totalWindForce.z = msg.totalWindForce * sin(this.options.windPhi);
 
     if (this.state.candles.length !== msg.candleCount) {
       this.state.candles.splice(0, this.state.candles.length);
 
-      const deltaR = 0.9 / msg.candleCount;
-      const deltaPhi = Math.PI / 5;
+      if (msg.candleCount !== 0) {
+        const n = msg.candleCount;
+        const nc = ceil(log2(n));
+        const dr = 0.9 / nc;
 
-      for (let i = 0; i < msg.candleCount; i++) {
-        this.state.candles.push({
-          x: i * deltaR * Math.cos(i * deltaPhi),
-          z: i * deltaR * Math.sin(i * deltaPhi),
-          isLit: true,
-        });
+        for (let i = 0; i < n; i++) {
+          const ic = floor(log2(i + 1));
+          const npc = 2 ** (ic + 1) <= n ? 2 ** ic : n - 2 ** ic + 1;
+          const r = ic * dr;
+          const dphi = (2 * PI) / npc;
+          const ipc = i - (2 ** ic - 1);
+          const phi = dphi * ipc + (PI * ic) / nc;
+
+          this.state.candles.push({
+            x: r * cos(phi),
+            z: r * sin(phi),
+            isLit: true,
+          });
+        }
       }
 
       shuffle(this.state.candles, msg.candleCount);
@@ -84,7 +96,7 @@ export class ClientEngine extends EventEmitter<{
     }
 
     while (blownOutCandleCount < msg.blownOutCandleCount) {
-      this.state.candles[blownOutCandleCount].isLit = true;
+      this.state.candles[blownOutCandleCount].isLit = false;
       blownOutCandleCount += 1;
     }
   }

@@ -37,7 +37,8 @@ export class ServerEngine extends EventEmitter<{
     this.state = {
       clientCount: 0,
       candleCount: options.candleCount,
-      blownOutCandleCount: 0,
+      // blownOutCandleCount: 0,
+      blownOutCandleCount: Math.floor(options.candleCount / 2),
       totalWindForce: 0,
       targetWindForce: 0,
       msAtTargetWindForce: 0,

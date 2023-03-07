@@ -12,6 +12,7 @@ esbuild \
 
 esbuild \
   --bundle \
+  --loader:.svg=dataurl \
   ./src/client-main.ts \
   --outfile=./dist/client.js
 
