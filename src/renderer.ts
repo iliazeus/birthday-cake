@@ -13,7 +13,6 @@ export interface RendererOptions {
 
 export class Renderer {
   private readonly containerElement: HTMLElement;
-  private lastClientEngineState: ClientEngineState;
 
   private readonly cakeSvg: HTMLImageElement;
   private readonly candleSvgTemplate: HTMLImageElement;
@@ -21,13 +20,6 @@ export class Renderer {
 
   constructor({ containerElement: container }: RendererOptions) {
     this.containerElement = container;
-
-    this.lastClientEngineState = {
-      clientCount: 0,
-      windForce: 0,
-      totalWindForce: { x: 0, z: 0 },
-      candles: [],
-    };
 
     Object.assign(this.containerElement.style, {
       position: "fixed",
@@ -66,14 +58,15 @@ export class Renderer {
     this.containerElement.replaceChildren(this.cakeSvg);
   }
 
-  updateEngineState(newState: ClientEngineState): void {
-    if (newState.candles.length !== this.lastClientEngineState.candles.length) {
+  updateEngineState(state: ClientEngineState): void {
+    if (this.candleSvgs.length !== state.candles.length) {
       this.containerElement.replaceChildren(this.cakeSvg);
       this.candleSvgs.splice(0, this.candleSvgs.length);
 
-      for (const candle of newState.candles) {
+      for (const candle of state.candles) {
         const candleSvg = this.candleSvgTemplate.cloneNode() as HTMLImageElement;
 
+        candleSvg.dataset.isLit = candle.isLit ? "true" : "";
         candleSvg.src = candle.isLit ? candleLitSvgDataUrl : candleBlownOutSvgDataUrl;
 
         Object.assign(candleSvg.style, {
@@ -87,16 +80,14 @@ export class Renderer {
       }
     } else {
       for (let i = 0; i < this.candleSvgs.length; i++) {
-        if (this.lastClientEngineState.candles[i].isLit && !newState.candles[i].isLit) {
+        if (this.candleSvgs[i].dataset.isLit && !state.candles[i].isLit) {
           this.candleSvgs[i].src = candleBlownOutSvgDataUrl;
         }
 
-        if (!this.lastClientEngineState.candles[i].isLit && newState.candles[i].isLit) {
+        if (!this.candleSvgs[i].dataset.isLit && state.candles[i].isLit) {
           this.candleSvgs[i].src = candleLitSvgDataUrl;
         }
       }
     }
-
-    this.lastClientEngineState = newState;
   }
 }
