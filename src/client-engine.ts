@@ -50,7 +50,7 @@ export class ClientEngine extends EventEmitter<{
     };
   }
 
-  updateServerState(msg: ServerMessageObject): void {
+  updateServerState(msg: Readonly<ServerMessageObject>): void {
     const { log2, floor, ceil, sin, cos, PI } = Math;
 
     this.state.clientCount = msg.clientCount;
@@ -101,7 +101,7 @@ export class ClientEngine extends EventEmitter<{
     }
   }
 
-  updateClientState(msg: ClientMessageObject): void {
+  updateClientState(msg: Readonly<ClientMessageObject>): void {
     this.state.windForce = msg.windForce;
   }
 

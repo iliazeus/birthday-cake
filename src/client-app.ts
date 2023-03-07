@@ -55,5 +55,6 @@ export class ClientApp {
   stop(): void {
     this.engine.stop();
     this.client.close();
+    this.noiseAnalyser.close();
   }
 }

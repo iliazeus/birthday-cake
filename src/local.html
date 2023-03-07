@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Birthday Cake</title>
+    <script src="local.js"></script>
+    <script>
+      window.onload = () => {
+        const app = new LocalApp({
+          serverEngine: {
+            msPerTick: Math.round(1000 / 16),
+            candleCount: 26,
+            candleLifetimeMs: Math.round(1000 * 0.05),
+            targetWindForcePerClient: 0.001,
+          },
+          clientEngine: {
+            msPerTick: Math.round(1000 / 16),
+            windPhi: 0,
+          },
+          renderer: {
+            containerElement: document.getElementById("container"),
+          },
+        });
+      };
+    </script>
+  </head>
+  <body>
+    <main id="container"></main>
+  </body>
+</html>

@@ -17,3 +17,11 @@ esbuild \
   --outfile=./dist/client.js
 
 cp ./src/index.html ./dist/index.html
+
+esbuild \
+  --bundle \
+  --loader:.svg=dataurl \
+  ./src/local-main.ts \
+  --outfile=./dist/local.js
+
+cp ./src/local.html ./dist/local.html
