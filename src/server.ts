@@ -25,7 +25,6 @@ export class Server extends EventEmitter<{
 }> {
   private readonly wsServer: WebSocketServer;
   private readonly openSockets = new Set<WebSocket>();
-  private readonly builder = new Builder(64);
 
   constructor({ host, port }: ServerOptions) {
     super();
@@ -88,30 +87,36 @@ export class Server extends EventEmitter<{
   }
 
   send(ws: WebSocket, msg: ServerMessageObject): void {
-    ServerMessage.createServerMessage(
-      this.builder,
-      msg.clientCount,
-      msg.candleCount,
-      msg.blownOutCandleCount,
-      msg.totalWindForce
+    const builder = new Builder(64);
+
+    builder.finish(
+      ServerMessage.createServerMessage(
+        builder,
+        msg.clientCount,
+        msg.candleCount,
+        msg.blownOutCandleCount,
+        msg.totalWindForce
+      )
     );
 
-    ws.send(this.builder.asUint8Array());
-    this.builder.clear();
+    ws.send(builder.asUint8Array());
   }
 
   broadcast(msg: ServerMessageObject): void {
-    ServerMessage.createServerMessage(
-      this.builder,
-      msg.clientCount,
-      msg.candleCount,
-      msg.blownOutCandleCount,
-      msg.totalWindForce
+    const builder = new Builder(64);
+
+    builder.finish(
+      ServerMessage.createServerMessage(
+        builder,
+        msg.clientCount,
+        msg.candleCount,
+        msg.blownOutCandleCount,
+        msg.totalWindForce
+      )
     );
 
-    const data = this.builder.asUint8Array();
+    const data = builder.asUint8Array();
     for (const socket of this.openSockets) socket.send(data);
-    this.builder.clear();
   }
 
   close(): void {

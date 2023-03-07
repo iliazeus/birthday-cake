@@ -17,7 +17,6 @@ export class Client extends EventEmitter<{
   message: [ServerMessage];
 }> {
   private readonly socket: WebSocket;
-  private readonly builder = new Builder(32);
 
   constructor({ url }: ClientOptions) {
     super();
@@ -65,9 +64,9 @@ export class Client extends EventEmitter<{
   }
 
   send(msg: ClientMessageObject): void {
-    ClientMessage.createClientMessage(this.builder, msg.windForce);
-    this.socket.send(this.builder.asUint8Array());
-    this.builder.clear();
+    const builder = new Builder(32);
+    builder.finish(ClientMessage.createClientMessage(builder, msg.windForce));
+    this.socket.send(builder.asUint8Array());
   }
 
   close(): void {
