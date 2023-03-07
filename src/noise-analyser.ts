@@ -1,5 +1,9 @@
 import EventEmitter from "eventemitter3";
 
+export interface NoiseAnalyserOptions {
+  bufferMs: number;
+}
+
 export class NoiseAnalyser extends EventEmitter<{
   open: [];
   close: [];
@@ -9,17 +13,18 @@ export class NoiseAnalyser extends EventEmitter<{
   private mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   private analyser: AnalyserNode | null = null;
 
-  private readonly data = new Float32Array(1000);
+  private data!: Float32Array;
 
-  constructor() {
+  constructor({ bufferMs }: NoiseAnalyserOptions) {
     super();
 
     navigator.mediaDevices
-      .getUserMedia({ audio: { sampleRate: 8000 } })
+      .getUserMedia({ audio: { sampleRate: 8000, noiseSuppression: false } })
       .then((mediaStream) => {
         this.ctx = new AudioContext({
-          sampleRate: mediaStream.getAudioTracks()[0].getSettings().sampleRate,
+          sampleRate: mediaStream.getAudioTracks()[0].getSettings().sampleRate!,
         });
+        this.data = new Float32Array(Math.ceil(this.ctx.sampleRate * (bufferMs / 1000)));
         this.mediaStreamSource = this.ctx.createMediaStreamSource(mediaStream);
         this.analyser = this.ctx.createAnalyser();
         this.mediaStreamSource.connect(this.analyser);
@@ -40,7 +45,8 @@ export class NoiseAnalyser extends EventEmitter<{
   }
 
   getNoiseLevel(): number {
-    this.analyser?.getFloatTimeDomainData(this.data);
+    if (!this.data || !this.analyser) return 0;
+    this.analyser.getFloatTimeDomainData(this.data);
 
     let l = 0;
     let min = this.data[0];

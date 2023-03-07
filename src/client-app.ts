@@ -1,11 +1,12 @@
 import { Client, ClientOptions } from "./client";
 import { ClientEngine, ClientEngineOptions } from "./client-engine";
-import { NoiseAnalyser as NoiseAnalyser } from "./noise-analyser";
+import { NoiseAnalyser as NoiseAnalyser, NoiseAnalyserOptions } from "./noise-analyser";
 import { Renderer, RendererOptions } from "./renderer";
 
 export interface ClientAppOptions {
   client: ClientOptions;
   engine: ClientEngineOptions;
+  noiseAnalyser: NoiseAnalyserOptions;
   renderer: RendererOptions;
 }
 
@@ -26,7 +27,7 @@ export class ClientApp {
     this.engine.on("stop", () => console.log("engine stopped"));
     this.engine.on("error", (e) => console.error("engine error", e));
 
-    this.noiseAnalyser = new NoiseAnalyser();
+    this.noiseAnalyser = new NoiseAnalyser(options.noiseAnalyser);
     this.noiseAnalyser.on("open", () => console.log("noise analyser initialized"));
     this.noiseAnalyser.on("close", () => console.log("noise analyser closed"));
     this.noiseAnalyser.on("error", (e) => console.error("noise analyser error", e));

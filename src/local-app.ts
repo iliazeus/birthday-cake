@@ -1,11 +1,12 @@
 import { ClientEngine, ClientEngineOptions } from "./client-engine";
-import { NoiseAnalyser } from "./noise-analyser";
+import { NoiseAnalyser, NoiseAnalyserOptions } from "./noise-analyser";
 import { Renderer, RendererOptions } from "./renderer";
 import { ServerEngine, ServerEngineOptions } from "./server-engine";
 
 export interface LocalAppOptions {
   serverEngine: ServerEngineOptions;
   clientEngine: ClientEngineOptions;
+  noiseAnalyser: NoiseAnalyserOptions;
   renderer: RendererOptions;
 }
 
@@ -26,7 +27,7 @@ export class LocalApp {
     this.clientEngine.on("stop", () => console.log("client engine stopped"));
     this.clientEngine.on("error", (e) => console.error("client engine error", e));
 
-    this.noiseAnalyser = new NoiseAnalyser();
+    this.noiseAnalyser = new NoiseAnalyser(options.noiseAnalyser);
     this.noiseAnalyser.on("open", () => console.log("noise analyser initialized"));
     this.noiseAnalyser.on("close", () => console.log("noise analyser closed"));
     this.noiseAnalyser.on("error", (e) => console.error("noise analyser error", e));
@@ -41,6 +42,7 @@ export class LocalApp {
       this.serverEngine.updateClientState(null, state);
       this.renderer.updateEngineState(state);
       const windForce = this.noiseAnalyser.getNoiseLevel();
+      console.debug(windForce.toFixed(3));
       this.clientEngine.updateClientState({ windForce });
     });
 

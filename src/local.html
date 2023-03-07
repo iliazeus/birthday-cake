@@ -12,11 +12,14 @@
             msPerTick: Math.round(1000 / 16),
             candleCount: 26,
             candleLifetimeMs: Math.round(1000 * 0.05),
-            targetWindForcePerClient: 0.001,
+            targetWindForcePerClient: 0.005,
           },
           clientEngine: {
             msPerTick: Math.round(1000 / 16),
             windPhi: 0,
+          },
+          noiseAnalyser: {
+            bufferMs: Math.round(1000 / 16),
           },
           renderer: {
             containerElement: document.getElementById("container"),
