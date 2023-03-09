@@ -6,6 +6,7 @@ export interface ServerEngineOptions {
   msPerTick: number;
   candleCount: number;
   targetWindForcePerClient: number;
+  firstCandleWindForceFactor: number;
   candleLifetimeMs: number;
 }
 
@@ -68,22 +69,26 @@ export class ServerEngine extends EventEmitter<{
   }
 
   private tick(deltaMs: number): void {
-    this.state.totalWindForce = 0;
-    for (const clientState of this.clientStates.values()) {
-      this.state.totalWindForce += clientState.windForce;
-    }
+    const { state, clientStates, options } = this;
 
-    if (this.state.totalWindForce === 0 || this.state.totalWindForce < this.state.targetWindForce) {
-      this.state.msAtTargetWindForce = 0;
+    state.totalWindForce = 0;
+    for (const clientState of clientStates.values()) state.totalWindForce += clientState.windForce;
+
+    if (state.totalWindForce === 0) {
+      state.msAtTargetWindForce = 0;
+    } else if (
+      state.blownOutCandleCount === 0 &&
+      state.totalWindForce < state.targetWindForce * options.firstCandleWindForceFactor
+    ) {
+      state.msAtTargetWindForce = 0;
+    } else if (state.totalWindForce < state.targetWindForce) {
+      state.msAtTargetWindForce = 0;
     } else {
-      this.state.msAtTargetWindForce += deltaMs;
+      state.msAtTargetWindForce += deltaMs;
 
-      while (this.state.msAtTargetWindForce >= this.options.candleLifetimeMs) {
-        this.state.msAtTargetWindForce -= this.options.candleLifetimeMs;
-
-        if (this.state.blownOutCandleCount < this.state.candleCount) {
-          this.state.blownOutCandleCount += 1;
-        }
+      while (state.msAtTargetWindForce >= options.candleLifetimeMs) {
+        state.msAtTargetWindForce -= options.candleLifetimeMs;
+        if (state.blownOutCandleCount < state.candleCount) state.blownOutCandleCount += 1;
       }
     }
 

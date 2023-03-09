@@ -13,6 +13,7 @@ const app = new ServerApp({
     candleCount: Number(process.env.ENGINE_CANDLE_COUNT ?? 26),
     candleLifetimeMs: Math.round(1000 * Number(process.env.ENGINE_CANDLE_LIFETIME ?? 0.05)),
     targetWindForcePerClient: Number(process.env.ENGINE_TARGET_WIND_FORCE_PER_CLIENT ?? 0.001),
+    firstCandleWindForceFactor: Number(process.env.ENGINE_FIRST_CANDLE_WIND_FORCE_FACTOR ?? 1.5),
   },
 });
 
