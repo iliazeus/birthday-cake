@@ -4,10 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Birthday Cake</title>
-    <script src="client.js"></script>
+    <script src="client.dist.js"></script>
     <script>
       window.onload = () => {
-        const app = new ClientApp({
+        const app = new BirthdayCake.ClientApp({
           client: {
             url: `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/socket`,
           },

@@ -1,1 +1,3 @@
 /flatbuffers
+*.dist.js
+*.dist.js.map

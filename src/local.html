@@ -4,10 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Birthday Cake</title>
-    <script src="local.js"></script>
+    <script>$LOCAL_DIST_JS</script>
     <script>
       window.onload = () => {
-        const app = new LocalApp({
+        const app = new BirthdayCake.LocalApp({
           serverEngine: {
             msPerTick: Math.round(1000 / 16),
             candleCount: 26,

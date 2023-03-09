@@ -6,22 +6,31 @@ rm -rf ./dist
 mkdir -p ./dist
 
 esbuild \
-  --bundle --platform=node \
+  --bundle --sourcemap=linked --minify --charset=utf8 \
+  --loader:.svg=dataurl \
+  --format=iife --global-name=BirthdayCake \
+  ./src/client-main.ts \
+  --outfile=./src/client.dist.js
+
+esbuild \
+  --bundle --platform=node --sourcemap=inline --minify --charset=utf8 \
+  --banner:js="#!/usr/bin/env node" \
+  --loader:.dist.js=text --loader:.dist.js.map=text --loader:.html=text \
   ./src/server-main.ts \
   --outfile=./dist/server.js
 
-esbuild \
-  --bundle \
-  --loader:.svg=dataurl \
-  ./src/client-main.ts \
-  --outfile=./dist/client.js
+chmod a+x ./dist/server.js
 
-cp ./src/index.html ./dist/index.html
+rm -f ./src/client.dist.js ./src/client.dist.js.map
 
 esbuild \
-  --bundle \
+  --bundle --sourcemap=inline --minify --charset=utf8 \
   --loader:.svg=dataurl \
+  --format=iife --global-name=BirthdayCake \
   ./src/local-main.ts \
-  --outfile=./dist/local.js
+  --outfile=./src/local.dist.js
 
-cp ./src/local.html ./dist/local.html
+LOCAL_DIST_JS="$(cat ./src/local.dist.js)" \
+envsubst < ./src/local.html > ./dist/local.html
+
+rm -f ./src/local.dist.js

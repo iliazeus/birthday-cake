@@ -23,6 +23,7 @@
     "express": "^4.18.2",
     "flatbuffers": "^23.3.3",
     "knuth-shuffle-seeded": "^1.0.6",
+    "source-map-support": "^0.5.21",
     "ws": "^8.12.1"
   },
   "devDependencies": {

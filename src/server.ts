@@ -6,6 +6,10 @@ import { AddressInfo, WebSocket, WebSocketServer } from "ws";
 import { ClientMessage } from "./flatbuffers/birthday-cake/client-message";
 import { ServerMessage } from "./flatbuffers/birthday-cake/server-message";
 
+import indexHtml from "./index.html";
+import clientDistJs from "./client.dist.js";
+import clientDistJsMap from "./client.dist.js.map";
+
 export interface ServerOptions {
   host: string;
   port: number;
@@ -26,6 +30,7 @@ export class Server extends EventEmitter<{
   disconnect: [WebSocket];
   message: [WebSocket, ClientMessage];
 }> {
+  private readonly expressApp: ReturnType<typeof express>;
   private readonly httpServer: HttpServer;
   private readonly wsServer: WebSocketServer;
   private readonly openSockets = new Set<WebSocket>();
@@ -33,7 +38,13 @@ export class Server extends EventEmitter<{
   constructor({ host, port }: ServerOptions) {
     super();
 
-    this.httpServer = express().use(express.static(__dirname)).listen(port, host);
+    this.expressApp = express();
+    this.expressApp.get("/", (req, res) => res.send(indexHtml));
+    this.expressApp.get("/index.html", (req, res) => res.send(indexHtml));
+    this.expressApp.get("/client.dist.js", (req, res) => res.send(clientDistJs));
+    this.expressApp.get("./client.dist.js.map", (req, res) => res.send(clientDistJsMap));
+
+    this.httpServer = this.expressApp.listen(port, host);
     this.httpServer.on("listening", () => this.onHttpServerListening());
     this.httpServer.on("close", () => this.onHttpServerClose());
     this.httpServer.on("error", (e) => this.onHttpServerError(e));

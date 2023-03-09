@@ -1,4 +1,6 @@
 import "dotenv/config";
+import "source-map-support";
+
 import { ServerApp } from "./server-app";
 
 const app = new ServerApp({

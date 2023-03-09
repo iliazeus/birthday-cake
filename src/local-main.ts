@@ -1,3 +1,1 @@
-import { LocalApp } from "./local-app";
-
-(window as any).LocalApp = LocalApp;
+export { LocalApp } from "./local-app";
