@@ -22,6 +22,9 @@ export class ClientApp {
     this.client.on("close", () => console.log("client disconnected"));
     this.client.on("error", (e) => console.error("client error", e));
 
+    this.client.on("close", () => setTimeout(() => location.reload(), 5000));
+    this.client.on("error", () => setTimeout(() => location.reload(), 5000));
+
     this.engine = new ClientEngine(options.engine);
     this.engine.on("start", () => console.log("engine started"));
     this.engine.on("stop", () => console.log("engine stopped"));
